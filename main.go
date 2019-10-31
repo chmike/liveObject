@@ -22,22 +22,23 @@ type tObj struct {
 
 // NewT instantiate a live T object.
 func NewT() *T {
-	t := &T{tObj: &tObj{b: "I’m T"}, a: "hello world"}
-
-	// the finalizer sets done to true when T is garbage collected
-	runtime.SetFinalizer(t, func(o interface{}) { o.(*T).tObj.done = true })
-
-	// the goroutine associated to T monitors done and terminate when true. It must not
-	// hold a pointer to T, only to tObj. So never use t in the goroutine, only o.
-	go func(o *tObj) {
+	o := &tObj{b: "I’m T"}
+	// the goroutine associated to T monitors done and terminate when true.
+	go func() {
 		for !o.done {
 			time.Sleep(1 * time.Second)
 			fmt.Println(o.b, ": I’m alive")
 		}
 		fmt.Println(o.b, ": I terminate")
-	}(t.tObj)
+	}()
 
-	// return the pointer to struct with an associated goroutine (live object)
+	// instantiate the live object
+	t := &T{tObj: o, a: "hello world"}
+
+	// the finalizer sets done to true when T is garbage collected
+	runtime.SetFinalizer(t, func(o interface{}) { o.(*T).tObj.done = true })
+
+	// return the pointer to the struct with an associated goroutine (live object)
 	return t
 }
 
