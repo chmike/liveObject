@@ -22,8 +22,11 @@ type tObj struct {
 
 // NewT instantiate a live T object.
 func NewT() *T {
+	// instantiate the sub-object
 	o := &tObj{b: "I’m T"}
-	// the goroutine associated to T monitors done and terminate when true.
+
+	// the goroutine associated to T refence and access the sub-object,
+	// monitors done and terminate when true
 	go func() {
 		for !o.done {
 			time.Sleep(1 * time.Second)
